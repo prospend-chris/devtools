@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,23 +10,34 @@
         body {
             font-family: 'Roboto', sans-serif;
             background: #f5f5f5;
+        }
+
+        .section {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 60vh;
         }
+
         .container {
             background: #ffffff;
             padding: 24px;
-            border-radius: 8px;
             box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-            width: 380px;
         }
+
         .title {
             font-size: 20px;
             font-weight: 500;
             margin-bottom: 16px;
         }
+
+        .label {
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333333;
+            margin: 8px;
+        }
+
         .input-field {
             width: 100%;
             padding: 10px;
@@ -36,6 +47,7 @@
             margin-top: 5px;
             font-size: 14px;
         }
+
         .button {
             width: 100%;
             padding: 10px;
@@ -48,20 +60,57 @@
             margin-bottom: 10px;
             margin-top: 5px;
         }
+
         .button.primary {
             background: #48a3ff;
             color: white;
         }
+
         .button.primary:hover {
             background: #2c83d8;
         }
+
         .button.secondary {
             background: #5ACFC0;
             color: white;
         }
+
         .button.secondary:hover {
             background: #2ea897;
         }
+
+        .button.reset {
+            width: 30%;
+            background: #5ACFC0;
+            color: white;
+        }
+
+        .button.reset:hover {
+            background: #2ea897;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 2px 4px;
+        }
+
+        .radio-group label:hover {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .radio-group label input[type="radio"] {
+            margin: 4px;
+        }
+
         .textarea {
             width: 100%;
             height: 100px;
@@ -70,34 +119,45 @@
             border-radius: 4px;
             font-size: 14px;
             resize: none;
-            background: #323232;
-            color: #89ff89;
+            background: #222222;
+            color: #5bff5b;
             font-family: 'Courier New', monospace;
         }
+
     </style>
 </head>
 <body>
-<div class="container">
-    <h2 class="title">ProSpend CodeBuild Command Generator</h2>
-    <label for="project">PROJECT</label>
-    <select id="project" class="input-field" onchange="clearCommand()"></select>
+<div class="section">
+    <div class="container">
+        <h2 class="title">ProSpend CodeBuild Command Generator</h2>
+        <label class="label">PROJECT</label>
+        <div id="projectOptions" class="radio-group"></div>
 
-    <label for="server">SERVER</label>
-    <select id="server" class="input-field" onchange="clearCommand()"></select>
+        <label class="label">SERVER</label>
+        <div id="serverOptions" class="radio-group"></div>
 
-    <label for="branch">BRANCH</label>
-    <input id="branch" type="text" class="input-field" placeholder="Enter branch name to be deployed" oninput="validateInput(); clearCommand()"/>
-    <p id="branchError" class="text-red-500 text-sm hidden">Branch name is required and cannot contain '/'</p>
-    <p id="branchInfo" class="text-purple-500 text-sm">Tip: Press the 'Enter' key after entering a branch name to proceed.</p>
-    <button id="generateBtn" onclick="generateCommand()" class="button primary" disabled>Generate Command</button>
-    <textarea id="command" readonly class="textarea" disabled></textarea>
-    <button id="copyBtn" onclick="copyToClipboard()" class="button secondary" disabled>Copy to Clipboard</button>
+        <label class="label" for="branch">BRANCH</label>
+        <input id="branch" type="text" class="input-field" placeholder="Enter branch name to be deployed"
+               oninput="validateInput(); clearCommand()"/>
+        <p id="branchError" class="text-red-500 text-sm hidden">Branch name is required and cannot contain '/'</p>
+        <p id="branchInfo" class="text-purple-500 text-sm">Tip: Press the 'Enter' key after entering a branch name to
+            proceed.</p>
+        <div style="display: flex; gap: 10px;">
+            <button id="generateBtn" onclick="generateCommand()" class="button primary" disabled>Generate Command
+            </button>
+            <button id="resetBtn" onclick="resetForm()" class="button reset">Reset</button>
+        </div>
+        <textarea id="command" readonly class="textarea" disabled></textarea>
+        <button id="copyBtn" onclick="copyToClipboard()" class="button secondary" disabled>Copy to Clipboard</button>
+    </div>
 </div>
-
 <script>
+  let commandCount = 0;
+  let isEffectActive = false;
+
   const options = {
     project: ["lucifer", "lucifer-multimodule", "data-analytics", "openapi-lucifer"],
-    server: Array.from({ length: 5 }, (_, i) => `lucifer-env-${i + 1}`)
+    server: Array.from({length: 5}, (_, i) => `lucifer-env-${i + 1}`)
   };
   options.server.push('hades-env');
 
@@ -112,8 +172,8 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    populateDropdown("project", options.project);
-    populateDropdown("server", options.server);
+    populateRadioButtons("projectOptions", options.project, "project");
+    populateRadioButtons("serverOptions", options.server, "server");
 
     document.getElementById('branch').addEventListener('keyup', (event) => {
       if (event.key === 'Enter') {
@@ -133,13 +193,32 @@
     });
   });
 
+  function populateRadioButtons(containerId, values, groupName) {
+    const container = document.getElementById(containerId);
+    values.forEach((value, index) => {
+      const label = document.createElement("label");
+      label.style.display = "block";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = groupName;
+      radio.value = value;
+      radio.id = `${groupName}-${index}`;
+      radio.addEventListener('change', clearCommand);
+
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(value));
+      container.appendChild(label);
+    });
+  }
+
   function validateInput() {
     const branch = document.getElementById('branch').value.trim();
     const errorMsg = document.getElementById('branchError');
     const generateBtn = document.getElementById('generateBtn');
     const copyBtn = document.getElementById('copyBtn');
 
-    if (!branch || branch.includes("/")) {
+    if (branch.includes("/")) {
       errorMsg.classList.remove("hidden");
       document.getElementById('branch').classList.add("border-red-500");
       generateBtn.disabled = true;
@@ -152,10 +231,18 @@
   }
 
   function generateCommand() {
-    const project = document.getElementById('project').value;
-    const server = document.getElementById('server').value;
+    const project = document.querySelector('input[name="project"]:checked')?.value;
+    const server = document.querySelector('input[name="server"]:checked')?.value;
     const branch = document.getElementById('branch').value.trim();
 
+    if (!project) {
+      alert("Please select a project");
+      return;
+    }
+    if (!server) {
+      alert("Please select a server");
+      return;
+    }
     if (!branch || branch.includes("/")) {
       document.getElementById('branch').focus();
       return;
@@ -165,6 +252,23 @@
 
     document.getElementById('command').value = command;
     document.getElementById('copyBtn').disabled = false;
+
+    commandCount++;
+    if (commandCount >= 10) {
+      commandCount = 0;
+      triggerLightSpeedEffect();
+    }
+  }
+
+  function triggerLightSpeedEffect() {
+    if (isEffectActive) return;
+    isEffectActive = true;
+
+    setTimeout(() => {
+      speed = 500;
+      webglBackground.style.display = 'none';
+      isEffectActive = false;
+    }, 5000);
   }
 
   function copyToClipboard() {
@@ -176,6 +280,19 @@
 
   function clearCommand() {
     document.getElementById('command').value = "";
+    document.getElementById('copyBtn').disabled = true;
+  }
+
+  function resetForm() {
+    document.getElementById('branch').value = "";
+    clearCommand();
+
+    document.querySelectorAll('input[name="project"]').forEach(radio => radio.checked = false);
+    document.querySelectorAll('input[name="server"]').forEach(radio => radio.checked = false);
+
+    document.getElementById('branchError').classList.add("hidden");
+
+    document.getElementById('generateBtn').disabled = true;
     document.getElementById('copyBtn').disabled = true;
   }
 </script>
