@@ -173,21 +173,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
-    try {
-      const response = await fetch('https://emsdev.lucifer2.psqa.net', {
-        mode: 'no-cors'
-      });
-      console.log(response);
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const meta = doc.querySelector('meta[data-version][data-view]');
-      const version = meta ? meta.getAttribute('data-version') : 'No version info found';
-
-      document.getElementById('versionInfo').textContent = `Version: ${version}`;
-    } catch (error) {
-      document.getElementById('versionInfo').textContent = `Failed to get version info: ${error.message}`;
-    }
-
     populateRadioButtons("projectOptions", options.project, "project");
     populateRadioButtons("serverOptions", options.server, "server");
 
