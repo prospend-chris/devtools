@@ -204,6 +204,13 @@
       radio.name = groupName;
       radio.value = value;
       radio.id = `${groupName}-${index}`;
+
+      // OpenAPI doesn't need to select a server
+      if (groupName === "project") {
+        radio.addEventListener('change', (e) => {
+          disableServerOptions(e.target.value.includes("openapi"));
+        });
+      }
       radio.addEventListener('change', clearCommand);
 
       label.appendChild(radio);
@@ -239,7 +246,7 @@
       alert("Please select a project");
       return;
     }
-    if (!server) {
+    if (!project.includes("openapi") && !server) {
       alert("Please select a server");
       return;
     }
@@ -248,7 +255,9 @@
       return;
     }
 
-    const command = `@aws codebuild start-build --project-name ${project} --region ap-southeast-2 --environment-variables-override name=environment,value=${server},type=PLAINTEXT name=branch,value=${branch},type=PLAINTEXT`;
+    const serverText = server ? ` --environment-variables-override name=environment,value=${server},type=PLAINTEXT` : '';
+    const branchText = branch ? ` --environment-variables-override name=branch,value=${branch},type=PLAINTEXT` : '';
+    const command = `@aws codebuild start-build --project-name ${project} --region ap-southeast-2${serverText} ${branchText}`;
 
     document.getElementById('command').value = command;
     document.getElementById('copyBtn').disabled = false;
@@ -294,6 +303,14 @@
 
     document.getElementById('generateBtn').disabled = true;
     document.getElementById('copyBtn').disabled = true;
+  }
+
+  function disableServerOptions(disable) {
+    const servers = document.querySelectorAll('input[name="server"]');
+    servers.forEach(server => {
+      server.checked = false;
+      server.disabled = disable;
+    });
   }
 </script>
 </body>
