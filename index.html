@@ -21,7 +21,7 @@
         .container {
             background: #ffffff;
             padding: 24px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .title {
@@ -256,10 +256,9 @@
     }
 
     const serverText = server ? ` --environment-variables-override name=environment,value=${server},type=PLAINTEXT` : '';
-    const branchText = branch ? ` --environment-variables-override name=branch,value=${branch},type=PLAINTEXT` : '';
-    const command = `@aws codebuild start-build --project-name ${project} --region ap-southeast-2${serverText} ${branchText}`;
+    const branchText = branch ? `name=branch,value=${branch},type=PLAINTEXT` : '';
 
-    document.getElementById('command').value = command;
+    document.getElementById('command').value = `@Amazon Q codebuild start-build --project-name ${project} --region ap-southeast-2${serverText} ${branchText}`;
     document.getElementById('copyBtn').disabled = false;
 
     commandCount++;
