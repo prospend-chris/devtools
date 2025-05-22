@@ -108,7 +108,9 @@ function generateCommand() {
   const serverText = server ? `name=environment,value=${server},type=PLAINTEXT` : '';
   const branchText = branch ? `name=branch,value=${branch},type=PLAINTEXT` : '';
 
-  const finalCommand = serverText?.length > 0 ? `@Amazon Q codebuild start-build --project-name ${project} --region ap-southeast-2 --environment-variables-override ${serverText} ${branchText}` : `@Amazon Q codebuild start-build --project-name ${project} --region ap-southeast-2 ${branchText}`;
+  const finalCommand = serverText?.length > 0 ?
+      `@Amazon Q codebuild start-build --project-name ${project} --region ap-southeast-2 --environment-variables-override ${serverText} ${branchText}` :
+      `@Amazon Q codebuild start-build --project-name ${project} --region ap-southeast-2 --environment-variables-override ${branchText}`;
 
   document.getElementById('command').value = finalCommand;
   document.getElementById('copyBtn').disabled = false;
