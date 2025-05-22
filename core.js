@@ -106,7 +106,7 @@ function generateCommand() {
   }
 
   const serverText = server ? `--environment-variables-override name=environment,value=${server},type=PLAINTEXT` : '';
-  const branchText = branch ? `--environment-variables-override name=branch,value=${branch},type=PLAINTEXT` : '';
+  const branchText = branch ? `name=branch,value=${branch},type=PLAINTEXT` : '';
 
   const finalCommand = serverText?.length > 0 ? `@Amazon Q codebuild start-build --project-name ${project} --region ap-southeast-2 ${serverText} ${branchText}` : `@Amazon Q codebuild start-build --project-name ${project} --region ap-southeast-2 ${branchText}`;
 
